@@ -9,6 +9,8 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
+var bcrypt = require('bcrypt-nodejs');
+
 var app = express();
 app.use(express.bodyParser());
 app.use(express.cookieParser("andrew and michelle's app"));
@@ -106,11 +108,11 @@ app.get('/logout', function(req, res){
 app.post('/login', function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
-  //user request should include username and password
-  //hash the password and compare against database
-  //should generate and send token in response (on successful login) and redirect to index page, otherwise throw error
-  new User({username: username, password: password}).fetch().then(function(found) {
-    if (found) {
+
+  new User({username: username}).fetch().then(function(user) {
+    console.log(user);
+    if (user) {
+      bcrypt.compareSync(password, user.get('password'));
       req.session.user = username;
       res.redirect('/');
     } else {
@@ -123,11 +125,16 @@ app.post('/login', function(req, res) {
 app.post('/signup', function(req, res) {
   //ADD PASSWORD HASHING W/SALT
 
-  new User({username: req.body.username}).fetch().then(function(found) {
+  var username = req.body.username;
+  var password = req.body.password;
+  //var salt = new Date();
+  new User({username: username}).fetch().then(function(found) {
+
     if (found) {
       res.send(400, 'Sorry, that username already exists');
     } else {
-      var user = new User({username: req.body.username, password: req.body.password});
+      var hash = bcrypt.hashSync(password);
+      var user = new User({username: username, password: hash});
 
       user.save().then(function(newUser) {
         Users.add(newUser);
