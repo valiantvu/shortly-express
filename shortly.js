@@ -83,11 +83,26 @@ app.post('/links', function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 app.get('/login', function(req, res) {
+  //if authenticated, redirect to index page
   res.render('login');
 });
 
+app.post('/login', function(req, res) {
+  //user request should include username and password
+  //hash the password and compare against database
+  //should generate and send token in response (on successful login) and redirect to index page, otherwise throw error
+});
+
 app.get('/signup', function(req, res) {
+  //if authenticated, redirect to index page
   res.render('signup');
+});
+
+app.post('/signup', function(req, res) {
+  //user request should include username and password
+  //build new User object and store in database
+  //generate new token
+  //send token in response (on successful login) and redirect to index page, otherwise throw error
 });
 
 
