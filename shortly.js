@@ -10,6 +10,9 @@ var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
 var app = express();
+app.use(express.bodyParser());
+app.use(express.cookieParser("andrew and michelle's app"));
+app.use(express.cookieSession());
 
 app.configure(function() {
   app.set('views', __dirname + '/views');
@@ -20,30 +23,32 @@ app.configure(function() {
 });
 
 app.get('/', function(req, res) {
-  res.redirect(301, '/login');
-  // Is user authenticated? Check cookies
-  // If authenticated, render index
-  // If no, redirect to login page
-    // res.render('index');
+  console.log(req.session);
+  if (req.session.user) {
+    res.render('index');
+  } else {
+    res.redirect(301, '/login');
+  }
 });
 
 app.get('/create', function(req, res) {
-  res.redirect(301, '/login');
-  // Is user authenticated? Check cookies
-  // If authenticated, render index
-  // If no, redirect to login page
-    // res.render('index');
+  if (req.session.user) {
+    res.render('index');
+  } else {
+    res.redirect(301, '/login');
+  }
 });
 
 // Accessed through Backbone collection
 app.get('/links', function(req, res) {
-  res.redirect(301, '/login');
-  // Is user authenticated? Check cookies
-  // If authenticated, send link models
-  // If not, then send 404
-    // Links.reset().fetch().then(function(links) {
-    //   res.send(200, links.models);
-    // });
+  if (req.session.user) {
+    Links.reset().fetch().then(function(links) {
+      res.send(200, links.models);
+    });
+  } else {
+    res.redirect(301, '/login');
+  }
+
 });
 
 app.post('/links', function(req, res) {
@@ -87,18 +92,49 @@ app.get('/login', function(req, res) {
   res.render('login');
 });
 
-app.post('/login', function(req, res) {
-  //user request should include username and password
-  //hash the password and compare against database
-  //should generate and send token in response (on successful login) and redirect to index page, otherwise throw error
-});
-
 app.get('/signup', function(req, res) {
   //if authenticated, redirect to index page
   res.render('signup');
 });
 
+app.get('/logout', function(req, res){
+  req.session = null;
+  console.log(req.session);
+  res.redirect('/login');
+});
+
+app.post('/login', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+  //user request should include username and password
+  //hash the password and compare against database
+  //should generate and send token in response (on successful login) and redirect to index page, otherwise throw error
+  new User({username: username, password: password}).fetch().then(function(found) {
+    if (found) {
+      req.session.user = username;
+      res.redirect('/');
+    } else {
+      res.redirect('/login');
+    }
+  });
+});
+
+
 app.post('/signup', function(req, res) {
+  //ADD PASSWORD HASHING W/SALT
+
+  new User({username: req.body.username}).fetch().then(function(found) {
+    if (found) {
+      res.send(400, 'Sorry, that username already exists');
+    } else {
+      var user = new User({username: req.body.username, password: req.body.password});
+
+      user.save().then(function(newUser) {
+        Users.add(newUser);
+        res.redirect('/');
+      });
+    }
+  });
   //user request should include username and password
   //build new User object and store in database
   //generate new token
