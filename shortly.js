@@ -20,28 +20,30 @@ app.configure(function() {
 });
 
 app.get('/', function(req, res) {
-
+  res.redirect(301, '/login');
   // Is user authenticated? Check cookies
   // If authenticated, render index
   // If no, redirect to login page
-  res.render('index');
+    // res.render('index');
 });
 
 app.get('/create', function(req, res) {
+  res.redirect(301, '/login');
   // Is user authenticated? Check cookies
   // If authenticated, render index
   // If no, redirect to login page
-  res.render('index');
+    // res.render('index');
 });
 
 // Accessed through Backbone collection
 app.get('/links', function(req, res) {
+  res.redirect(301, '/login');
   // Is user authenticated? Check cookies
   // If authenticated, send link models
   // If not, then send 404
-  Links.reset().fetch().then(function(links) {
-    res.send(200, links.models);
-  });
+    // Links.reset().fetch().then(function(links) {
+    //   res.send(200, links.models);
+    // });
 });
 
 app.post('/links', function(req, res) {
