@@ -13,8 +13,8 @@ var Link = require('../app/models/link');
 // Swap the commented lines or remove the 'x' from beforeEach
 // when working on authentication tests.
 /************************************************************/
-// var xbeforeEach = beforeEach;
-var xbeforeEach = function(){};
+var xbeforeEach = beforeEach;
+// var xbeforeEach = function(){};
 /************************************************************/
 
 
@@ -70,6 +70,7 @@ describe('', function() {
           'username': 'Phillip',
           'password': 'Phillip'
       }).save().then(function(){
+        console.log('hello');
         var options = {
           'method': 'POST',
           'followAllRedirects': true,
